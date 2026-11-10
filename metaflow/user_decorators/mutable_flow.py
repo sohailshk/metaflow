@@ -455,10 +455,10 @@ class MutableFlow:
                     "Mutable flow overriding flow decorator '%s' "
                     "(removing existing decorator and adding new one)" % flow_deco.name
                 )
-                flow_decos = self._flow_cls._flow_state[FlowStateItems.FLOW_DECORATORS]
-                self._flow_cls._flow_state[FlowStateItems.FLOW_DECORATORS] = {
-                    d: flow_decos[d] for d in flow_decos if d != flow_deco.name
-                }
+                # Remove in place (like remove_decorator does). Assigning a new dict
+                # through _flow_state only updates _self_data and leaves the cached
+                # merged dict, which _do_add() reads, still holding the old decorator.
+                del flow_decos[flow_deco.name]
                 return _do_add()
             elif duplicates == MutableFlow.ERROR:
                 # If we error, we raise an exception
